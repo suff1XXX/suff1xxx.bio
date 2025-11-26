@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#000" />
+  <title>Suff1XXX</title>
+
+  <!-- Ninja emoji favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🥷</text></svg>">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=VT323&family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --panel: rgba(16, 18, 24, 0.82);
+      --text: #e6e7ea;
+      --muted: #9aa0a6;
+      --accent: #fff;
+      --border: rgba(255, 255, 255, 0.12);
+      --radius: 28px;
+      --blur: 20px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { 
+      background: #000; 
+      color: var(--text); 
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; 
+      overflow-x: hidden;
+      opacity: 0;
+      animation: fadeInBody 1.2s ease-out forwards;
+    }
+
+    /* CRT + BG */
+    .crt::after { 
+      content:""; 
+      position: fixed; 
+      inset: 0; 
+      background: rgba(18,16,16,0.1); 
+      animation: flicker .15s infinite; 
+      pointer-events: none; 
+      z-index: 10; 
+    }
+    .scanlines { 
+      position: fixed; 
+      inset: 0; 
+      pointer-events: none; 
+      z-index: 11; 
+      background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,.25) 50%); 
+      background-size: 100% 4px; 
+      mix-blend-mode: soft-light; 
+      opacity: 0;
+      animation: scanlinesIn 1.5s ease-out 0.8s forwards;
+    }
+    .grain { 
+      position: fixed; 
+      inset: 0; 
+      pointer-events: none; 
+      z-index: 12; 
+      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADPSURBVGhD7c+xDcAwAEMx/y85cM8gQBl0g2aABqiAClSgAhVoQAUqUIEKVKACFahABSpQgQpUoAIlUGLf222bd23fWe/shAlJmJCECUlYkIQJSViQhAmJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSViQhAlJmJCECUlYkIQJSfgCFw1rYQ0h220AAAAASUVORK5CYII='); 
+      opacity: .07; 
+      animation: grain 1s steps(1) infinite; 
+    }
+    .bg { 
+      position: fixed; 
+      inset: -5%; 
+      z-index: -10; 
+      background: url('img/bg.png') center/cover no-repeat; 
+      animation: bg-pan 30s linear infinite alternate, bgZoomIn 2s ease-out; 
+      filter: saturate(1.05) brightness(.9); 
+      transform: scale(1.1);
+    }
+
+    @keyframes fadeInBody {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes scanlinesIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes flicker { 
+      0%{opacity:.1} 
+      20%{opacity:1} 
+      40%{opacity:.3} 
+      60%{opacity:.9} 
+      80%{opacity:.2} 
+      100%{opacity:.8} 
+    }
+    @keyframes grain { 
+      0%,100%{transform:translate(0,0)} 
+      20%{transform:translate(1%,-1%)} 
+      40%{transform:translate(-1%,1%)} 
+      60%{transform:translate(2%,-1%)} 
+      80%{transform:translate(-1%,2%)} 
+    }
+    @keyframes bg-pan { 
+      from { transform: scale(1.04); } 
+      to { transform: scale(1.18); } 
+    }
+    @keyframes bgZoomIn {
+      from { transform: scale(1.3); opacity: 0; }
+      to { transform: scale(1.1); opacity: 1; }
+    }
+
+    /* CONTAINER */
+    .container { 
+      max-width: 860px; 
+      margin: 0 auto; 
+      padding: 4rem 2rem; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 1.25rem; 
+      min-height: 100dvh; 
+      justify-content: center; 
+    }
+
+    /* PANEL */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.25rem;
+      backdrop-filter: blur(var(--blur));
+      box-shadow: 0 14px 44px rgba(0,0,0,.6), inset 0 0 20px rgba(255,255,255,.02);
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: panelSlideIn 0.8s ease-out forwards;
+    }
+
+    .panel:nth-child(1) { animation-delay: 0.2s; }
+    .panel:nth-child(2) { animation-delay: 0.4s; }
+    .panel:nth-child(3) { animation-delay: 0.6s; }
+    .panel:nth-child(4) { animation-delay: 0.8s; }
+
+    @keyframes panelSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* PROFILE */
+    .profile { 
+      display: grid; 
+      grid-template-columns: 72px 1fr; 
+      align-items: center; 
+      gap: 1.25rem; 
+    }
+    .avatar { 
+      width: 72px; 
+      height: 72px; 
+      border-radius: 50%; 
+      border: 2px solid var(--border); 
+      background: #111 center/cover no-repeat; 
+      position: relative; 
+      overflow: hidden; 
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+    .avatar::after { 
+      content: ''; 
+      position: absolute; 
+      inset: 0; 
+      border-radius: 50%; 
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5); 
+    }
+    .meta { 
+      display: flex; 
+      flex-direction: column; 
+      gap: .5rem; 
+    }
+    .nick { 
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.75rem; 
+      font-weight: 700; 
+      letter-spacing: .2px; 
+      background: linear-gradient(90deg, #fff, #cbd5ff, #fff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(203, 213, 255, 0.3);
+      animation: textGlow 3s ease-in-out infinite alternate, textShine 4s linear infinite;
+    }
+    .about {
+      font-family: 'VT323', monospace;
+      font-size: 1.25rem;
+      color: #d7d7d7;
+      text-shadow: 0 0 2px rgba(255,255,255,.25);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.85rem;
+      animation: statusPulse 2s infinite, statusSlide 5s ease-in-out infinite;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: dotPulse 1.5s ease-in-out infinite;
+    }
+    .badges { 
+      display: flex; 
+      gap: .5rem; 
+      flex-wrap: wrap; 
+    }
+    .badge { 
+      font-size: .75rem; 
+      padding: .25rem .5rem; 
+      border-radius: 999px; 
+      background: rgba(255,255,255,0.05); 
+      border: 1px solid var(--border); 
+      color: var(--muted); 
+      display: inline-flex; 
+      align-items: center; 
+      gap: .35rem; 
+      transition: all 0.3s ease; 
+      animation: badgeFloat 6s ease-in-out infinite;
+      position: relative;
+      overflow: hidden;
+    }
+    .badge::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .badge:hover::before {
+      left: 100%;
+    }
+    .badge:hover { 
+      transform: translateY(-2px) scale(1.05); 
+      background: rgba(255,255,255,0.1); 
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .badge svg { 
+      width: 12px; 
+      height: 12px; 
+      fill: currentColor; 
+    }
+
+    @keyframes textGlow {
+      0% { text-shadow: 0 0 10px rgba(203, 213, 255, 0.3); }
+      100% { text-shadow: 0 0 20px rgba(203, 213, 255, 0.6), 0 0 30px rgba(203, 213, 255, 0.4); }
+    }
+
+    @keyframes textShine {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes statusPulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.7; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes statusSlide {
+      0%, 100% { transform: translateX(0); }
+      50% { transform: translateX(5px); }
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    @keyframes badgeFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    /* VIEWS + TOOLTIP */
+    .views {
+      position: absolute; 
+      top: .9rem; 
+      right: .9rem;
+      display: inline-flex; 
+      align-items: center; 
+      gap: .375rem;
+      font-size: .75rem; 
+      color: var(--muted);
+      background: rgba(0,0,0,.5); 
+      padding: .375rem .625rem;
+      border-radius: 999px; 
+      border: 1px solid var(--border);
+      backdrop-filter: blur(4px); 
+      z-index: 3;
+      transition: all 0.3s ease;
+      animation: viewsPulse 4s ease-in-out infinite;
+    }
+    .views:hover { 
+      transform: scale(1.05) rotate(5deg); 
+      background: rgba(0,0,0,.7);
+    }
+    .views svg { 
+      width: 14px; 
+      height: 14px; 
+      opacity: .85; 
+      animation: viewsIconSpin 8s linear infinite;
+    }
+    .views:hover::after {
+      content: attr(data-tip);
+      position: absolute; 
+      top: -2.6rem; 
+      right: 0;
+      background: #0f1115; 
+      color: #fff; 
+      padding: .5rem .7rem;
+      border-radius: 12px; 
+      font-size: .75rem; 
+      white-space: nowrap; 
+      z-index: 9999;
+      border: 1px solid var(--border); 
+      box-shadow: 0 8px 16px rgba(0,0,0,.6);
+      animation: tooltipFade 0.3s ease-out;
+    }
+
+    @keyframes viewsPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    @keyframes viewsIconSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes tooltipFade {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* DISCORD SUMMARY PANEL */
+    .discord { 
+      display: flex; 
+      align-items: center; 
+      gap: 1rem; 
+    }
+    .icon { 
+      width: 52px; 
+      height: 52px; 
+      border-radius: 16px; 
+      background: #111 center/cover no-repeat; 
+      border: 1px solid var(--border); 
+      animation: discordIconFloat 5s ease-in-out infinite;
+    }
+    .info .title { 
+      font-weight: 600; 
+      font-size: 1rem; 
+    }
+    .info .stats { 
+      font-size: .8rem; 
+      color: var(--muted); 
+    }
+    .online { 
+      color: var(--text); 
+    }
+    .join { 
+      margin-left: auto; 
+      padding: .6rem 1rem; 
+      border-radius: 14px; 
+      background: rgba(88,101,242,.18); 
+      border: 1px solid rgba(88,101,242,.45); 
+      color: #fff; 
+      text-decoration: none; 
+      font-size: .85rem; 
+      font-weight: 500; 
+      transition: all 0.3s ease; 
+      position: relative;
+      overflow: hidden;
+    }
+    .join::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .join:hover::before {
+      left: 100%;
+    }
+    .join:hover { 
+      background: rgba(88,101,242,.34); 
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 5px 15px rgba(88,101,242,0.4);
+    }
+
+    @keyframes discordIconFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-5px) rotate(5deg); }
+    }
+
+    /* PLAYER */
+    .player { 
+      display: grid; 
+      grid-template-columns: 90px 1fr auto; 
+      grid-template-areas: "cover info controls" "progress progress progress"; 
+      align-items: center; 
+      gap: 1rem 1.25rem; 
+    }
+    .cover { 
+      grid-area: cover; 
+      width: 90px; 
+      height: 90px; 
+      border-radius: 16px; 
+      background: #111 center/cover no-repeat; 
+      border: 1px solid var(--border); 
+      position: relative; 
+      overflow: hidden; 
+      animation: coverRotate 20s linear infinite, coverPulse 4s ease-in-out infinite;
+    }
+    .cover::after { 
+      content: ''; 
+      position: absolute; 
+      inset: 0; 
+      border-radius: 16px; 
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5); 
+    }
+    .track-info { 
+      grid-area: info; 
+    }
+    .track-info .title { 
+      font-weight: 600; 
+      font-size: 1rem; 
+      animation: titleSlide 10s linear infinite;
+      background: linear-gradient(90deg, #fff, #cbd5ff, #fff);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .track-info .artist { 
+      font-size: .875rem; 
+      color: var(--muted); 
+      margin-top: .25rem; 
+      animation: artistPulse 3s ease-in-out infinite;
+    }
+    .controls { 
+      grid-area: controls; 
+      display: flex; 
+      align-items: center; 
+      gap: .6rem; 
+    }
+    .ctrl { 
+      width: 46px; 
+      height: 46px; 
+      border-radius: 50%; 
+      background: rgba(255,255,255,0.06); 
+      border: 1px solid var(--border); 
+      display: grid; 
+      place-items: center; 
+      cursor: pointer; 
+      transition: all 0.3s ease; 
+      position: relative;
+      overflow: hidden;
+    }
+    .ctrl::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .ctrl:hover::before {
+      left: 100%;
+    }
+    .ctrl:hover { 
+      background: rgba(255,255,255,0.12); 
+      transform: scale(1.07) rotate(5deg);
+      box-shadow: 0 5px 15px rgba(255,255,255,0.1);
+    }
+    .ctrl.play { 
+      width: 54px; 
+      height: 54px; 
+      background: rgba(255,255,255,0.1); 
+      animation: playButtonPulse 2s ease-in-out infinite;
+    }
+    .ctrl svg { 
+      width: 20px; 
+      height: 20px; 
+      fill: var(--text); 
+      transition: transform 0.3s ease;
+    }
+    .ctrl:hover svg {
+      transform: scale(1.1);
+    }
+    .progress { 
+      grid-area: progress; 
+      display: flex; 
+      align-items: center; 
+      gap: .75rem; 
+      font-size: .75rem; 
+      color: var(--muted); 
+    }
+    .bar { 
+      flex: 1; 
+      height: 6px; 
+      background: rgba(255,255,255,0.08); 
+      border-radius: 4px; 
+      overflow: hidden; 
+      cursor: pointer; 
+      position: relative;
+    }
+    .bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      animation: barShine 3s linear infinite;
+    }
+    .fill { 
+      height: 100%; 
+      background: linear-gradient(90deg, #fff, #cbd5ff); 
+      width: 0; 
+      border-radius: 4px; 
+      transition: width .1s linear; 
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes coverRotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes coverPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    @keyframes titleSlide {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    @keyframes artistPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes playButtonPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.2); }
+      50% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+    }
+
+    @keyframes barShine {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* APP ICON LINKS (square buttons) */
+    .links { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); 
+      gap: .9rem; 
+    }
+    .app-btn {
+      position: relative;
+      display: grid; 
+      place-items: center;
+      width: 70px;
+      height: 70px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    .app-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: left 0.5s;
+    }
+    .app-btn:hover::before {
+      left: 100%;
+    }
+    .app-btn:hover {
+      background: rgba(255,255,255,0.1);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    .app-btn img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: brightness(0.9);
+      transition: all 0.3s ease;
+    }
+    .app-btn:hover img {
+      transform: scale(1.1);
+      filter: brightness(1.1);
+    }
+
+    /* Brand colors for buttons */
+    .app-btn--telegram { 
+      background: rgba(42, 171, 238, 0.18);
+      border-color: rgba(42, 171, 238, 0.45);
+    }
+    .app-btn--telegram:hover {
+      background: rgba(42, 171, 238, 0.34);
+    }
+
+    .app-btn--instagram { 
+      background: rgba(225, 48, 108, 0.18);
+      border-color: rgba(225, 48, 108, 0.45);
+    }
+    .app-btn--instagram:hover {
+      background: rgba(225, 48, 108, 0.34);
+    }
+
+    .app-btn--youtube { 
+      background: rgba(255, 0, 0, 0.18);
+      border-color: rgba(255, 0, 0, 0.45);
+    }
+    .app-btn--youtube:hover {
+      background: rgba(255, 0, 0, 0.34);
+    }
+
+    .app-btn--github { 
+      background: rgba(36, 41, 46, 0.18);
+      border-color: rgba(36, 41, 46, 0.45);
+    }
+    .app-btn--github:hover {
+      background: rgba(36, 41, 46, 0.34);
+    }
+
+    .app-btn--discord { 
+      background: rgba(88, 101, 242, 0.18);
+      border-color: rgba(88, 101, 242, 0.45);
+    }
+    .app-btn--discord:hover {
+      background: rgba(88, 101, 242, 0.34);
+    }
+
+    .app-btn--twitch { 
+      background: rgba(145, 70, 255, 0.18);
+      border-color: rgba(145, 70, 255, 0.45);
+    }
+    .app-btn--twitch:hover {
+      background: rgba(145, 70, 255, 0.34);
+    }
+
+    .app-btn--tiktok { 
+      background: rgba(0, 0, 0, 0.18);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .app-btn--tiktok:hover {
+      background: rgba(0, 0, 0, 0.34);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container { padding: 2rem 1rem; }
+      .profile { grid-template-columns: 60px 1fr; gap: 1rem; }
+      .avatar { width: 60px; height: 60px; }
+      .nick { font-size: 1.4rem; }
+      .about { font-size: 1.05rem; flex-direction: column; align-items: flex-start; gap: 0.25rem; }
+      .player { grid-template-columns: 1fr; grid-template-areas: "cover" "info" "controls" "progress"; text-align: center; }
+      .controls { justify-content: center; }
+      .cover { margin: 0 auto; }
+      .links { grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); gap: .7rem; }
+      .app-btn { width: 60px; height: 60px; border-radius: 16px; }
+      .app-btn img { width: 28px; height: 28px; }
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 1.5rem 1rem; gap: 1rem; }
+      .profile { grid-template-columns: 50px 1fr; }
+      .avatar { width: 50px; height: 50px; }
+      .nick { font-size: 1.25rem; }
+      .about { font-size: 1rem; }
+      .badges { gap: .3rem; }
+      .badge { font-size: .7rem; }
+      .views { top: 0.7rem; right: 0.7rem; }
+      .links { grid-template-columns: repeat(auto-fit, minmax(55px, 1fr)); }
+      .app-btn { width: 55px; height: 55px; }
+      .app-btn img { width: 26px; height: 26px; }
+    }
+
+    /* Loading animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- CRT EFFECTS -->
+  <div class="crt"></div>
+  <div class="grain"></div>
+  <div class="scanlines"></div>
+
+  <!-- BACKGROUND -->
+  <div class="bg"></div>
+
+  <main class="container">
+    <!-- PROFILE -->
+    <section class="panel profile">
+      <div class="avatar" id="avatar"></div>
+
+      <div class="meta">
+        <h1 class="nick" id="nickname">Suff1XXX</h1>
+        <p class="about" id="about">
+          main character syndrome
+          <span class="status">
+            <span class="status-dot"></span>
+            <span id="statusText">poet</span>
+          </span>
+        </p>
+        <div class="badges" id="badges"></div>
+      </div>
+
+      <div class="views" data-tip="Views">
+        <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/></svg>
+        <span id="views">0</span>
+      </div>
+    </section>
+
+    <!-- DISCORD -->
+    <section class="panel discord" id="discord" hidden>
+      <div class="icon" id="communityAvatar"></div>
+      <div class="info">
+        <div class="title" id="communityTitle"></div>
+        <div class="stats">
+          <span class="online" id="communityOnline"></span>
+          <span id="communityMembers"></span>
+        </div>
+      </div>
+      <a id="communityCta" class="join" target="_blank" rel="noopener">Join</a>
+    </section>
+
+    <!-- PLAYER -->
+    <section class="panel player" id="player" hidden>
+      <div class="cover" id="cover"></div>
+      <div class="track-info">
+        <div class="title" id="trackTitle">—</div>
+        <div class="artist" id="trackArtist">—</div>
+      </div>
+      <div class="controls">
+        <button id="prev" class="ctrl"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+        <button id="play" class="ctrl play"><svg id="playIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <button id="next" class="ctrl"><svg viewBox="0 0 24 24"><path d="M6 6l8.5 6-8.5 6z"/></svg></button>
+      </div>
+      <div class="progress">
+        <div class="bar" id="bar"><div class="fill" id="fill"></div></div>
+        <span id="cur">00:00</span>
+        <span id="dur">00:00</span>
+      </div>
+    </section>
+
+    <!-- APP BUTTON LINKS -->
+    <section class="panel links" id="links"></section>
+  </main>
+
+  <script>
+    const CONFIG = {
+      assets: {
+        bg: 'img/bg.png',
+        avatar: 'img/avatar.png',
+        cover: 'img/cover.jpg'
+      },
+      profile: {
+        nickname: 'Suff1XXX',
+        about: 'main character syndrome',
+        statuses: ['poet', 'billionaire', 'coder', 'ninja', 'philosopher', 'gamer', 'music lover', 'anonymous'],
+        badges: [
+          { label: 'verified', icon: '<svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l7.1-7.1 1.4 1.4z"/></svg>' },
+          { label: 'owner', icon: '<svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>' },
+          { label: 'billionaire', icon: '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' },
+          { label: 'developer', icon: '<svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>' },
+          { label: 'designer', icon: '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' }
+        ],
+        links: [
+          { icon: 'telegram', url: 'https://t.me/sufff1xxx', name: 'Telegram' },
+          { icon: 'instagram', url: '1', name: 'Instagram' },
+          { icon: 'youtube', url: '1', name: 'YouTube' },
+          { icon: 'github', url: 'https://github.com/suffiXXX', name: 'GitHub' },
+          { icon: 'discord', url: 'https://discord.gg/a762WKrntK', name: 'Discord' },
+          { icon: 'twitch', url: 'https://www.twitch.tv/suff1xxxdfq', name: 'Twitch' },
+          { icon: 'tiktok', url: '1', name: 'TikTok' },
+        ],
+        community: {
+          enabled: true,
+          inviteUrl: 'https://discord.gg/35kP8zWr'
+        }
+      }
+    };
+
+    const $ = id => document.getElementById(id);
+    const audio = new Audio();
+    let queue = [], index = 0;
+
+    // INIT
+    document.querySelector('.bg').style.backgroundImage = `url('${CONFIG.assets.bg}')`;
+    $('avatar').style.backgroundImage = `url('${CONFIG.assets.avatar}')`;
+    $('cover').style.backgroundImage = `url('${CONFIG.assets.cover}')`;
+    $('nickname').textContent = CONFIG.profile.nickname;
+    $('about').textContent = CONFIG.profile.about;
+
+    // Status rotation
+    let statusIndex = 0;
+    function rotateStatus() {
+      statusIndex = (statusIndex + 1) % CONFIG.profile.statuses.length;
+      $('statusText').textContent = CONFIG.profile.statuses[statusIndex];
+    }
+    setInterval(rotateStatus, 3000);
+
+    // Badges
+    CONFIG.profile.badges.forEach(b => {
+      const span = document.createElement('span');
+      span.className = 'badge';
+      span.innerHTML = `${b.icon || ''} ${b.label}`;
+      $('badges').appendChild(span);
+    });
+
+    // Links as square buttons with icons
+    CONFIG.profile.links.forEach(l => {
+      const a = document.createElement('a');
+      a.className = `app-btn app-btn--${l.icon}`;
+      a.href = l.url; 
+      a.target = '_blank'; 
+      a.rel = 'noopener';
+      a.title = l.name;
+      
+      const img = document.createElement('img');
+      img.src = `img/icon/${l.icon}.png`;
+      img.alt = l.name;
+      img.loading = 'lazy';
+      
+      // Fallback if image fails to load
+      img.onerror = function() {
+        // Create a fallback with platform initial
+        const fallback = document.createElement('div');
+        fallback.className = 'fallback-icon';
+        fallback.textContent = l.name.charAt(0);
+        fallback.style.cssText = `
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: bold;
+          font-size: 16px;
+          border-radius: 6px;
+          background: rgba(255,255,255,0.1);
+          color: white;
+        `;
+        a.innerHTML = '';
+        a.appendChild(fallback);
+      };
+      
+      a.appendChild(img);
+      $('links').appendChild(a);
+    });
+
+    // Discord
+    if (CONFIG.profile.community.enabled && CONFIG.profile.community.inviteUrl) {
+      const invite = CONFIG.profile.community.inviteUrl.split('/').pop();
+      $('communityCta').href = `https://discord.gg/${invite}`;
+      fetch(`https://discord.com/api/v9/invites/${invite}?with_counts=true`)
+        .then(r => r.ok ? r.json() : Promise.reject(r))
+        .then(d => {
+          if (d && d.guild) {
+            $('communityTitle').textContent = d.guild.name || 'Discord Server';
+            const icon = d.guild.icon ? `https://cdn.discordapp.com/icons/${d.guild.id}/${d.guild.icon}.webp?size=128` : CONFIG.assets.cover;
+            $('communityAvatar').style.backgroundImage = `url('${icon}')`;
+            $('communityOnline').textContent = d.approximate_presence_count ? `${d.approximate_presence_count} online` : '';
+            $('communityMembers').textContent = d.approximate_member_count ? `• ${d.approximate_member_count} members` : '';
+            $('discord').hidden = false;
+          }
+        }).catch(e => {
+            console.error('Failed to fetch Discord invite:', e);
+            $('discord').hidden = true;
+        });
+    }
+
+    // Views
+    (() => {
+      const el = $('views');
+      const countKey = 'suff1xxx-bio';
+      const endpoint = `https://api.countapi.xyz/hit/${countKey}/visits`;
+      fetch(endpoint)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => { if(data) el.textContent = data.value.toLocaleString('en-US'); })
+        .catch(() => {
+            let views = parseInt(localStorage.getItem(countKey) || '0', 10);
+            views++;
+            localStorage.setItem(countKey, views);
+            el.textContent = views.toLocaleString('en-US');
+        });
+    })();
+
+    // Music
+    // Demo tracks list (replace with real files)
+    const demoMusic = [
+      { src: 'music/DAKOOKA - Море.mp3', artist: 'DAKOOKA', title: 'Море' },
+      { src: 'music/𝐃𝐚𝐫𝐤 𝐌𝐮𝐬𝐢𝐜 – Fantasia.mp3', artist: 'Soon...', title: 'Fantasia' },
+    ];
+
+    // Autoplay music
+    function initMusic() {
+      $('player').hidden = false;
+      queue = demoMusic;
+      
+      // Load and play random track
+      loadTrack(Math.floor(Math.random() * queue.length));
+    }
+
+    // Player
+    function fmt(s) { const t = Math.floor(s || 0); return `${Math.floor(t/60).toString().padStart(2,'0')}:${(t%60).toString().padStart(2,'0')}`; }
+    function setPlayIcon(p) { $('playIcon').innerHTML = p ? '<path d="M6 4h4v16H6zm8 0h4v16h-4z"/>' : '<path d="M8 5v14l11-7z"/>'; }
+
+    async function loadTrack(i) {
+      index = ((i % queue.length) + queue.length) % queue.length;
+      const item = queue[index];
+      audio.src = item.src;
+      
+      // Display track name immediately
+      $('trackTitle').textContent = item.title;
+      $('trackArtist').textContent = item.artist;
+      
+      try {
+        await audio.play();
+        setPlayIcon(true);
+      } catch (err) {
+        console.warn("Autoplay was prevented by the browser.");
+        setPlayIcon(false);
+      }
+    }
+
+    function next() {
+        let newIndex = index;
+        if (queue.length > 1) {
+            while (newIndex === index) {
+                newIndex = Math.floor(Math.random() * queue.length);
+            }
+        }
+        loadTrack(newIndex);
+    }
+
+    function prev() { loadTrack(index - 1); }
+
+    $('play').onclick = () => audio.paused ? audio.play() : audio.pause();
+    $('next').onclick = next;
+    $('prev').onclick = prev;
+    $('bar').onclick = e => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const p = (e.clientX - rect.left) / rect.width;
+      if(isFinite(audio.duration)) audio.currentTime = p * audio.duration;
+    };
+
+    audio.onplay = () => setPlayIcon(true);
+    audio.onpause = () => setPlayIcon(false);
+    audio.onloadedmetadata = () => $('dur').textContent = fmt(audio.duration);
+    audio.ontimeupdate = () => {
+      $('cur').textContent = fmt(audio.currentTime);
+      if(isFinite(audio.duration)) {
+        $('fill').style.width = `${(audio.currentTime / audio.duration) * 100}%`;
+      }
+    };
+    audio.onended = () => setTimeout(next, 800);
+
+    // Keyboard
+    window.addEventListener('keydown', e => {
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') { e.preventDefault(); audio.paused ? audio.play() : audio.pause(); }
+      if (e.code === 'ArrowRight') { e.preventDefault(); next(); }
+      if (e.code === 'ArrowLeft') { e.preventDefault(); prev(); }
+    });
+
+    // Initialize music after page load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(initMusic, 1000);
+    });
+  </script>
+</body>
+</html>
